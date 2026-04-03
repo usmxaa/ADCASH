@@ -17,7 +17,6 @@
                         'dark-bg': '#0a0d15',
                         'card-bg': '#1e2632',
                         'primary-green': '#00e676',
-                        'accent-blue': '#1877f2',
                         'input-bg': '#131924',
                         'border-gray': '#313d4f',
                     }
@@ -26,17 +25,15 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; background-color: #0a0d15; color: white; }
         .card-shadow { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
         .neon-btn { transition: 0.3s; position: relative; overflow: hidden; }
         .neon-btn:hover { box-shadow: 0 0 25px rgba(0, 230, 118, 0.4); transform: translateY(-2px); }
-        .neon-btn:active { transform: translateY(0); }
         .bg-glow {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% 50%, rgba(0, 230, 118, 0.05) 0%, transparent 50%);
             z-index: -1;
         }
-        /* Maintenance Overlay Style */
         #maintenance-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #0a0d15; z-index: 9999; display: none;
@@ -44,121 +41,83 @@
         }
     </style>
 </head>
-<body class="bg-dark-bg text-white min-h-screen flex flex-col font-inter">
+<body class="min-h-screen flex flex-col font-inter">
     
     <div id="maintenance-screen">
         <div class="h-20 w-20 bg-primary-green/20 rounded-3xl flex items-center justify-center mb-6 border border-primary-green/30">
             <i class="fas fa-tools text-3xl text-primary-green animate-bounce"></i>
         </div>
         <h1 class="text-4xl font-black uppercase italic tracking-tighter text-white">System <span class="text-primary-green">Offline</span></h1>
-        <p class="text-slate-500 font-bold uppercase tracking-[3px] text-xs mt-4">We are currently updating our servers.<br>Please check back in a few minutes.</p>
+        <p class="text-slate-500 font-bold uppercase tracking-[3px] text-xs mt-4">We are updating our servers. Check back soon.</p>
     </div>
 
     <div class="bg-glow"></div>
 
     <header class="w-full flex justify-between items-center p-5 px-6 lg:px-12 border-b border-border-gray sticky top-0 bg-dark-bg/80 backdrop-blur-lg z-50">
         <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.reload()">
-            <div class="h-10 w-10 bg-primary-green rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,230,118,0.3)]">
+            <div class="h-10 w-10 bg-primary-green rounded-xl flex items-center justify-center">
                 <span class="text-black text-2xl font-black italic">A</span>
             </div>
-            <span class="text-xl font-black tracking-tight italic uppercase">AdCash<span class="text-primary-green">Global</span></span>
-        </div>
-        <div class="hidden md:flex items-center gap-6">
-            <a href="#" class="text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition">Leaderboard</a>
-            <button class="bg-primary-green/10 text-primary-green px-6 py-2.5 rounded-xl font-black text-xs border border-primary-green/20 hover:bg-primary-green hover:text-black transition uppercase tracking-widest">Sign Up</button>
+            <span class="text-xl font-black italic uppercase">AdCash<span class="text-primary-green">Global</span></span>
         </div>
     </header>
 
     <main class="flex-1 flex items-center justify-center p-5 py-12 lg:py-20">
         <div class="w-full max-w-7xl flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
             
-            <div class="flex-1 text-center lg:text-left space-y-12">
+            <div class="flex-1 text-center lg:text-left space-y-8">
                 <div class="inline-flex items-center gap-2 bg-primary-green/10 border border-primary-green/20 px-4 py-2 rounded-full mb-4">
                     <span class="flex h-2 w-2 rounded-full bg-primary-green animate-pulse"></span>
-                    <span id="payout-notice" class="text-primary-green text-[10px] font-black uppercase tracking-widest">System Online & Paying</span>
+                    <span class="text-primary-green text-[10px] font-black uppercase tracking-widest">System Online & Paying</span>
                 </div>
-
-                <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] max-w-2xl mx-auto lg:mx-0 italic uppercase">
+                <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] italic uppercase">
                     Earn <span class="text-primary-green">Real Cash</span> <br> Every Day.
                 </h1>
-                
                 <p class="text-gray-500 font-bold text-lg max-w-lg mx-auto lg:mx-0">
-                    Join the fastest growing reward platform. Test apps, complete surveys, and get paid instantly.
+                    Join 1.2M+ users making money daily through tasks, surveys, and spins.
                 </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto lg:mx-0">
-                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
-                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968260.png" alt="Binance" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
-                        <h3 class="font-black text-sm uppercase">Verify KYC</h3>
-                        <p class="text-primary-green font-black text-xl leading-none mt-1">$5.50</p>
-                    </div>
-                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
-                        <img src="https://cdn-icons-png.flaticon.com/512/888/888871.png" alt="TikTok" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
-                        <h3 class="font-black text-sm uppercase">TikTok Lite</h3>
-                        <p class="text-primary-green font-black text-xl leading-none mt-1">$1.20</p>
-                    </div>
-                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
-                        <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Survey" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
-                        <h3 class="font-black text-sm uppercase">Quick Survey</h3>
-                        <p class="text-primary-green font-black text-xl leading-none mt-1">$0.85</p>
-                    </div>
-                </div>
             </div>
 
-            <div class="w-full max-w-md bg-card-bg p-8 md:p-10 rounded-[45px] border border-border-gray card-shadow relative">
-                <h2 class="text-3xl font-black text-center mb-8 italic uppercase tracking-tighter">AdCash <span class="text-gray-500">Global</span></h2>
+            <div class="w-full max-w-md bg-card-bg p-8 md:p-10 rounded-[45px] border border-border-gray card-shadow">
+                <h2 id="authTitle" class="text-3xl font-black text-center mb-8 italic uppercase tracking-tighter">Login <span class="text-gray-500">Now</span></h2>
                 
                 <form id="authForm" class="space-y-4">
                     <div class="space-y-1">
-                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest">Email Address</label>
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest text-left block">Email Address</label>
                         <input type="email" id="email" required placeholder="name@example.com" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
                     </div>
 
                     <div class="space-y-1">
-                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest">Password</label>
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest text-left block">Password</label>
                         <input type="password" id="password" required placeholder="••••••••" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
                     </div>
                     
-                    <button type="submit" id="submitBtn" class="w-full bg-primary-green text-black font-black py-5 rounded-2xl text-lg tracking-widest neon-btn uppercase italic shadow-[0_10px_20px_rgba(0,230,118,0.2)]">
+                    <button type="submit" id="submitBtn" class="w-full bg-primary-green text-black font-black py-5 rounded-2xl text-lg tracking-widest neon-btn uppercase italic shadow-lg">
                         Login Now
                     </button>
                 </form>
-                
-                <div class="flex items-center gap-3 my-8">
-                    <div class="flex-1 h-px bg-border-gray"></div>
-                    <span class="text-gray-500 text-[10px] font-black uppercase tracking-[4px]">OR</span>
-                    <div class="flex-1 h-px bg-border-gray"></div>
-                </div>
-                
-                <div class="grid grid-cols-3 gap-3">
-                    <button class="bg-input-bg border border-border-gray p-4 rounded-2xl flex items-center justify-center hover:bg-white/5 transition">
-                        <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" class="h-6">
-                    </button>
-                    <button class="bg-input-bg border border-border-gray p-4 rounded-2xl flex items-center justify-center hover:bg-white/5 transition">
-                        <img src="https://cdn-icons-png.flaticon.com/512/124/124010.png" alt="Facebook" class="h-6">
-                    </button>
-                    <button class="bg-input-bg border border-border-gray p-4 rounded-2xl flex items-center justify-center hover:bg-white/5 transition">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" class="h-6 invert">
-                    </button>
-                </div>
+
+                <p class="text-center mt-6 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    <span id="toggleText">Don't have an account?</span> 
+                    <button id="toggleAuth" class="text-primary-green hover:underline">Create Account</button>
+                </p>
             </div>
         </div>
     </main>
 
-    <footer class="w-full p-8 border-t border-border-gray bg-card-bg/30 mt-auto">
+    <footer class="w-full p-8 border-t border-border-gray bg-card-bg/30">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-8">
                 <div class="text-center md:text-left">
                     <p class="text-primary-green font-black text-2xl leading-none">4.8/5</p>
-                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">Trustpilot Score</p>
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Trustpilot</p>
                 </div>
-                <div class="h-8 w-px bg-border-gray hidden md:block"></div>
                 <div class="text-center md:text-left">
                     <p class="text-white font-black text-2xl leading-none">1.2M+</p>
-                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-1">Active Users</p>
+                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Active Users</p>
                 </div>
             </div>
-            <p class="text-gray-600 text-[10px] font-black uppercase tracking-widest">© 2026 AdCashGlobal Inc.</p>
+            <p class="text-gray-600 text-[10px] font-black uppercase tracking-widest">© 2026 AdCashGlobal</p>
         </div>
     </footer>
 
@@ -173,8 +132,7 @@
             projectId: "adcashglobal-efb58",
             storageBucket: "adcashglobal-efb58.firebasestorage.app",
             messagingSenderId: "749601861677",
-            appId: "1:749601861677:web:8a8d8da27be53d238f48a4",
-            measurementId: "G-G8V65XPHF4"
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -183,31 +141,40 @@
 
         const authForm = document.getElementById('authForm');
         const submitBtn = document.getElementById('submitBtn');
+        const authTitle = document.getElementById('authTitle');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const toggleText = document.getElementById('toggleText');
         const maintenanceScreen = document.getElementById('maintenance-screen');
 
-        // ১. রিয়েল-টাইম মেইনটেন্যান্স চেক
-        onSnapshot(doc(db, "settings", "site_config"), (snap) => {
-            if (snap.exists()) {
-                const config = snap.data();
-                if (config.maintenanceMode === true) {
-                    maintenanceScreen.style.display = 'flex';
-                } else {
-                    maintenanceScreen.style.display = 'none';
-                }
+        let isLoginMode = true;
+
+        // ১. মেইনটেন্যান্স চেক
+        onSnapshot(doc(db, "system", "config"), (snap) => {
+            if (snap.exists() && snap.data().maintenance === true) {
+                maintenanceScreen.style.display = 'flex';
+            } else {
+                maintenanceScreen.style.display = 'none';
             }
         });
 
-        // ২. লগইন অবস্থা চেক
+        // ২. লগইন/সাইনআপ সুইচ
+        toggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            authTitle.innerHTML = isLoginMode ? `Login <span class="text-gray-500">Now</span>` : `Create <span class="text-primary-green">Account</span>`;
+            submitBtn.innerText = isLoginMode ? "Login Now" : "Sign Up Now";
+            toggleText.innerText = isLoginMode ? "Don't have an account?" : "Already have an account?";
+            toggleAuth.innerText = isLoginMode ? "Create Account" : "Login Here";
+        });
+
+        // ৩. অটো লগইন চেক
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = "dashboard.html";
-            }
+            if (user) window.location.href = "dashboard.html";
         });
 
-        // ৩. ফর্ম সাবমিট (লগইন এবং সাইনআপ)
+        // ৪. ফর্ম সাবমিট
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
@@ -215,42 +182,30 @@
             submitBtn.disabled = true;
 
             try {
-                // ডাটাবেস থেকে সাইনআপ বোনাস রিট্রিভ করা
-                const settingsSnap = await getDoc(doc(db, "settings", "site_config"));
-                const signupBonus = settingsSnap.exists() ? settingsSnap.data().signupBonus : 0.05;
-
-                // লগইন চেষ্টা
-                await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = "dashboard.html";
-
-            } catch (error) {
-                // যদি একাউন্ট না থাকে তবে নতুন একাউন্ট খুলবে
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-                    try {
-                        const newUserCredential = await createUserWithEmailAndPassword(auth, email, password);
-                        const user = newUserCredential.user;
-
-                        // নতুন ইউজারের ডাটা সেভ
-                        await setDoc(doc(db, "users", user.uid), {
-                            uid: user.uid,
-                            email: email,
-                            name: email.split('@')[0],
-                            balance: signupBonus, // বোনাস যোগ হলো
-                            role: "user",
-                            dateJoined: new Date().toLocaleDateString()
-                        });
-
-                        alert(`Welcome! You've received $${signupBonus} signup bonus.`);
-                        window.location.href = "dashboard.html";
-                    } catch (signupError) {
-                        alert("Signup Error: " + signupError.message);
-                    }
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    alert("Auth Error: " + error.message);
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    // সাইনআপ বোনাস রিট্রিভ করা
+                    const configSnap = await getDoc(doc(db, "system", "config"));
+                    const bonus = configSnap.exists() ? configSnap.data().dailyBonus : 0.005;
+
+                    await setDoc(doc(db, "users", cred.user.uid), {
+                        uid: cred.user.uid,
+                        email: email,
+                        name: email.split('@')[0],
+                        balance: bonus,
+                        role: "user",
+                        dateJoined: new Date().toLocaleDateString()
+                    });
+                    alert(`Signup Success! You got $${bonus} bonus.`);
                 }
+            } catch (err) {
+                alert(err.message);
             } finally {
-                submitBtn.innerText = "Login Now";
                 submitBtn.disabled = false;
+                submitBtn.innerText = isLoginMode ? "Login Now" : "Sign Up Now";
             }
         });
     </script>
