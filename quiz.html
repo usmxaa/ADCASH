@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0a0d15; color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .option-btn { background: #1e2632; transition: 0.2s; border: 1px solid #30363d; cursor: pointer; }
+        .option-btn:active { transform: scale(0.95); }
+        .correct { background: #00e676 !important; color: black !important; border-color: #00e676 !important; font-weight: 900; }
+        .wrong { background: #ef4444 !important; color: white !important; border-color: #ef4444 !important; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-quiz { animation: slideIn 0.4s ease-out; }
+        #timer-bar { transition: width 1s linear; }
+    </style>
+</head>
+<body class="p-6 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md animate-quiz">
+        <div class="flex justify-between items-center mb-8">
+            <a href="tasks.html" class="h-10 w-10 bg-[#1e2632] rounded-full flex items-center justify-center border border-gray-800 hover:text-[#00e676]">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="px-4 py-1 bg-[#00e676]/10 border border-[#00e676]/30 rounded-full">
+                <p class="text-[10px] text-[#00e676] font-black uppercase tracking-widest">Score: <span id="score">0</span>/10</p>
+            </div>
+        </div>
+
+        <div class="bg-[#1e2632] p-10 rounded-[45px] border-b-8 border-[#00e676] text-center mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gray-800">
+                <div id="timer-bar" class="h-full bg-[#00e676] w-full"></div>
+            </div>
+            <p id="q-count" class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Question 1</p>
+            <h2 id="question-text" class="text-5xl font-black tracking-tighter">0 + 0 = ?</h2>
+        </div>
+
+        <div id="options-container" class="grid grid-cols-2 gap-4">
+            </div>
+
+        <p class="text-center text-[10px] text-gray-600 mt-10 font-bold uppercase tracking-[4px]">Earn $0.010 for 8+ Correct Answers</p>
+    </div>
+
+    <div id="quizModal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center hidden p-6">
+        <div class="bg-[#1e2632] p-10 rounded-[45px] border border-[#00e676] text-center w-full max-w-sm">
+            <i class="fas fa-trophy text-6xl text-yellow-500 mb-6"></i>
+            <h1 class="text-3xl font-black mb-2">Excellent!</h1>
+            <p class="text-gray-400 text-sm mb-8 uppercase font-bold tracking-widest">Reward Added to Balance</p>
+            <h2 class="text-5xl font-black text-[#00e676] mb-8 leading-none">+$0.010</h2>
+            <button onclick="location.href='tasks.html'" class="w-full bg-[#00e676] text-black font-black py-5 rounded-2xl hover:scale-105 transition">COLLECT REWARD</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentQuestion = 1;
+        let score = 0;
+        let correctAnswer = 0;
+        let timeLeft = 10;
+        let timerInterval;
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                generateQuestion();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function startTimer() {
+            timeLeft = 10;
+            document.getElementById('timer-bar').style.width = "100%";
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-bar').style.width = (timeLeft * 10) + "%";
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    nextStep(); // সময় শেষ হলে পরের প্রশ্নে যাবে
+                }
+            }, 1000);
+        }
+
+        function generateQuestion() {
+            if (currentQuestion > 10) {
+                finishQuiz();
+                return;
+            }
+            startTimer();
+            document.getElementById('q-count').innerText = `Question ${currentQuestion}`;
+            document.getElementById('score').innerText = score;
+
+            const n1 = Math.floor(Math.random() * 30) + 1;
+            const n2 = Math.floor(Math.random() * 20) + 1;
+            const ops = ['+', '-', '*'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+
+            if (op === '+') { correctAnswer = n1 + n2; }
+            else if (op === '-') { correctAnswer = Math.max(n1, n2) - Math.min(n1, n2); }
+            else { correctAnswer = Math.floor(Math.random() * 10) * Math.floor(Math.random() * 10); }
+
+            document.getElementById('question-text').innerText = (op === '-' ? Math.max(n1, n2) + " - " + Math.min(n1, n2) : (op === '*' ? (correctAnswer/n1).toFixed(0) + " × " + n1 : n1 + " + " + n2)) + " = ?";
+            
+            let options = [correctAnswer];
+            while(options.length < 4) {
+                let w = correctAnswer + (Math.floor(Math.random() * 10) - 5);
+                if(!options.includes(w)) options.push(w);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = "";
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn p-6 rounded-3xl font-black text-xl";
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(btn, opt);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(btn, selected) {
+            clearInterval(timerInterval);
+            const all = document.querySelectorAll('.option-btn');
+            all.forEach(b => b.disabled = true);
+
+            if (selected === correctAnswer) {
+                btn.classList.add('correct');
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                all.forEach(b => { if(parseInt(b.innerText) === correctAnswer) b.classList.add('correct'); });
+            }
+            setTimeout(nextStep, 1000);
+        }
+
+        function nextStep() {
+            currentQuestion++;
+            generateQuestion();
+        }
+
+        async function finishQuiz() {
+            if (score >= 8) {
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    balance: increment(0.010),
+                    todayEarnings: increment(0.010)
+                });
+                document.getElementById('quizModal').classList.remove('hidden');
+            } else {
+                alert(`You got ${score}/10. Need 8 to earn. Try again!`);
+                window.location.href = "tasks.html";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0a0d15; color: white; font-family: 'Inter', sans-serif; }
+        .profile-card { background: #161b22; border: 1px solid #30363d; }
+        .stat-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .input-field { background: #0d1117; border: 1px solid #30363d; transition: 0.3s; }
+        .input-field:focus { border-color: #00e676; outline: none; }
+        .neon-border { border: 1px solid #00e676; box-shadow: 0 0 15px rgba(0, 230, 118, 0.1); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-black uppercase tracking-tighter italic">User <span class="text-[#00e676]">Profile</span></h1>
+            <a href="dashboard.html" class="h-10 w-10 bg-[#161b22] rounded-full flex items-center justify-center border border-gray-800 hover:text-[#00e676] transition">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-1 space-y-6">
+                <div class="profile-card p-8 rounded-[40px] text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-[#00e676]"></div>
+                    <div class="relative inline-block mb-4">
+                        <img id="profile-img" src="https://ui-avatars.com/api/?name=User&background=00e676&color=000&size=128" alt="User" class="rounded-3xl w-24 h-24 mx-auto border-4 border-[#1e2632]">
+                        <div class="absolute bottom-0 right-0 bg-[#00e676] text-black h-8 w-8 rounded-full border-4 border-[#161b22] text-[8px] flex items-center justify-center">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <h2 id="display-name" class="text-xl font-bold italic uppercase">Loading...</h2>
+                    <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-4">Standard Account</p>
+                    <div class="inline-block bg-[#00e676]/10 px-4 py-1 rounded-full text-[#00e676] text-[10px] font-black uppercase">Verified Member</div>
+                </div>
+
+                <div class="profile-card p-6 rounded-[35px] space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-xs font-bold">Account ID</span>
+                        <span id="display-id" class="text-[10px] font-bold opacity-70">...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-xs font-bold">Total Earnings</span>
+                        <span id="display-total-earn" class="text-sm font-bold text-[#00e676]">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="bg-[#161b22] p-8 rounded-[40px] text-center border border-blue-500/30 shadow-xl">
+                    <i class="fab fa-telegram text-5xl text-blue-400 mb-6 block"></i>
+                    <h2 class="text-xl font-black italic uppercase">Join Support</h2>
+                    <a href="https://t.me/yourlink" target="_blank" class="mt-6 inline-block w-full bg-blue-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest">
+                        JOIN TELEGRAM
+                    </a>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="stat-box p-6 rounded-[30px]">
+                        <p class="text-gray-500 text-[10px] font-bold uppercase mb-1">Current Balance</p>
+                        <h3 id="main-balance" class="text-2xl font-black text-[#00e676]">$0.000</h3>
+                    </div>
+                    <div class="stat-box p-6 rounded-[30px]">
+                        <p class="text-gray-500 text-[10px] font-bold uppercase mb-1">Referral Bonus</p>
+                        <h3 id="referral-bonus" class="text-2xl font-black text-blue-400">$0.00</h3>
+                    </div>
+                </div>
+
+                <div class="profile-card p-8 rounded-[40px]">
+                    <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                        <i class="fas fa-user-cog text-[#00e676]"></i> Account Settings
+                    </h3>
+                    
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Full Name</label>
+                                <input type="text" id="full-name-input" class="input-field w-full p-4 rounded-2xl text-sm font-bold">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Email Address</label>
+                                <input type="email" id="email-input" class="input-field w-full p-4 rounded-2xl text-sm font-bold opacity-50" disabled>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase ml-2">Payment Wallet (PayPal/BTC/USDT)</label>
+                            <input type="text" id="wallet-input" placeholder="Enter wallet address" class="input-field w-full p-4 rounded-2xl text-sm font-bold">
+                        </div>
+
+                        <div class="pt-4">
+                            <button id="saveProfileBtn" class="w-full bg-[#00e676] text-black font-black py-4 rounded-2xl hover:scale-[1.02] transition">
+                                SAVE CHANGES
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card p-6 rounded-[35px] flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="h-10 w-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                        <p class="text-sm font-bold">Account Security</p>
+                    </div>
+                    <button id="logoutBtn" class="text-red-500 text-xs font-black uppercase tracking-widest hover:underline">
+                        Secure Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // রিয়েল-টাইম ডাটা লোড
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        document.getElementById('display-name').innerText = data.name || "User";
+                        document.getElementById('display-id').innerText = user.uid.substring(0, 10).toUpperCase();
+                        document.getElementById('main-balance').innerText = "$" + (data.balance || 0).toFixed(3);
+                        document.getElementById('referral-bonus').innerText = "$" + (data.referEarnings || 0).toFixed(2);
+                        document.getElementById('display-total-earn').innerText = "$" + ((data.balance || 0) + (data.withdrawTotal || 0)).toFixed(2);
+                        
+                        document.getElementById('full-name-input').value = data.name || "";
+                        document.getElementById('email-input').value = user.email;
+                        document.getElementById('wallet-input').value = data.wallet || "";
+                        
+                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=00e676&color=000&size=128`;
+                        document.getElementById('profile-img').src = avatarUrl;
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // প্রোফাইল আপডেট
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            const newName = document.getElementById('full-name-input').value.trim();
+            const newWallet = document.getElementById('wallet-input').value.trim();
+            
+            if(!newName) return alert("Name is required!");
+
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    name: newName,
+                    wallet: newWallet
+                });
+                alert("Profile Updated Successfully! ✅");
+            } catch (error) {
+                alert("Error updating profile!");
+            }
+        };
+
+        // লগআউট
+        document.getElementById('logoutBtn').onclick = () => {
+            if(confirm("Logout from AdCashGlobal?")) {
+                signOut(auth).then(() => {
+                    window.location.href = "index.html";
+                });
+            }
+        };
+    </script>
+</body>
+</html>

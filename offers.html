@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Offers | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0a0d15; color: white; font-family: 'Inter', sans-serif; }
+        .offer-card { 
+            background: linear-gradient(145deg, #161b22, #1c2128);
+            border: 1px solid #30363d;
+            transition: all 0.3s ease;
+        }
+        .offer-card:hover { 
+            border-color: #00e676; 
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 230, 118, 0.1);
+        }
+        .badge-premium { background: linear-gradient(90deg, #ff9800, #f44336); }
+        .filter-btn.active { background-color: #00e676 !important; color: black !important; border-color: #00e676 !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-black uppercase tracking-tighter italic">Premium <span class="text-[#00e676]">Offers</span></h1>
+                <p class="text-gray-500 text-sm font-bold uppercase tracking-widest mt-1">High Paying Tasks Only</p>
+            </div>
+            <a href="dashboard.html" class="h-12 w-12 bg-[#161b22] rounded-2xl flex items-center justify-center border border-gray-800 hover:text-[#00e676] transition shadow-lg">
+                <i class="fas fa-times text-xl"></i>
+            </a>
+        </div>
+
+        <div id="filter-container" class="flex gap-3 mb-8 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="filterTasks('all', this)" class="filter-btn active bg-[#161b22] border border-gray-800 px-6 py-2 rounded-full text-xs font-black uppercase whitespace-nowrap transition-all">All Jobs</button>
+            <button onclick="filterTasks('apps', this)" class="filter-btn bg-[#161b22] text-gray-400 border border-gray-800 px-6 py-2 rounded-full text-xs font-black uppercase whitespace-nowrap transition-all">Apps</button>
+            <button onclick="filterTasks('surveys', this)" class="filter-btn bg-[#161b22] text-gray-400 border border-gray-800 px-6 py-2 rounded-full text-xs font-black uppercase whitespace-nowrap transition-all">Surveys</button>
+            <button onclick="filterTasks('signup', this)" class="filter-btn bg-[#161b22] text-gray-400 border border-gray-800 px-6 py-2 rounded-full text-xs font-black uppercase whitespace-nowrap transition-all">Signup</button>
+        </div>
+
+        <div id="offers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="col-span-full py-20 text-center opacity-50">
+                <i class="fas fa-circle-notch animate-spin text-3xl mb-4"></i>
+                <p class="font-bold uppercase tracking-widest text-xs">Loading Premium Offers...</p>
+             </div>
+        </div>
+
+        <div class="mt-12 bg-blue-500/10 border border-blue-500/20 p-6 rounded-[30px] text-center">
+            <p class="text-blue-400 text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                <i class="fas fa-shield-alt"></i> Verified tasks are tracked automatically
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, increment, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let allTasks = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadTasks();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // ১. ডাটাবেস থেকে টাস্ক লোড করা
+        function loadTasks() {
+            onSnapshot(collection(db, "premium_offers"), (snapshot) => {
+                allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUI(allTasks);
+            });
+        }
+
+        // ২. UI-তে টাস্ক রেন্ডার করা
+        function renderUI(tasks) {
+            const grid = document.getElementById('offers-grid');
+            grid.innerHTML = "";
+
+            if(tasks.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-gray-500 py-10 font-bold uppercase text-xs">No tasks available in this category.</div>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                grid.innerHTML += `
+                    <div class="offer-card p-6 rounded-[35px] flex items-center gap-5 relative overflow-hidden">
+                        ${task.isHot ? '<div class="absolute top-0 right-0 badge-premium text-[8px] font-black px-4 py-1 rounded-bl-2xl uppercase tracking-tighter shadow-lg">Hot Offer</div>' : ''}
+                        
+                        <div class="h-16 w-16 bg-black/40 rounded-2xl flex-shrink-0 flex items-center justify-center border border-gray-800">
+                            <img src="${task.icon || 'https://cdn-icons-png.flaticon.com/512/1162/1162280.png'}" class="h-10 w-10 object-contain" alt="Icon">
+                        </div>
+                        
+                        <div class="flex-grow">
+                            <h4 class="font-black text-base leading-tight mb-1 uppercase tracking-tighter">${task.title}</h4>
+                            <p class="text-gray-500 text-[10px] mb-3 font-bold uppercase tracking-wide">${task.description}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[#00e676] font-black text-xl">$${parseFloat(task.reward).toFixed(2)}</span>
+                                <button onclick="window.startTask('${task.id}', ${task.reward}, '${task.link}')" 
+                                    class="bg-white text-black px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-[#00e676] transition active:scale-95">
+                                    Start Job
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ৩. ফিল্টার ফাংশন
+        window.filterTasks = (category, btn) => {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active', 'text-black');
+                b.classList.add('text-gray-400');
+            });
+            btn.classList.add('active');
+            btn.classList.remove('text-gray-400');
+
+            if(category === 'all') {
+                renderUI(allTasks);
+            } else {
+                const filtered = allTasks.filter(t => t.category === category);
+                renderUI(filtered);
+            }
+        };
+
+        // ৪. টাস্ক কমপ্লিট এবং রিওয়ার্ড অ্যাড
+        window.startTask = async (taskId, amount, link) => {
+            // আসল অ্যাপে এখানে লিংকে পাঠিয়ে ট্র্যাকিং করা হয়
+            // বর্তমানে আমরা একটা সিম্পল ডেমো দেখাচ্ছি
+            if(confirm(`Do you want to start this task for $${amount.toFixed(2)}?`)) {
+                window.open(link || 'https://google.com', '_blank');
+                
+                // এখানে আপনি ইউজারকে বলতে পারেন টাস্ক শেষ করে এসে "Claim" বাটনে চাপ দিতে
+                // বা অটোমেটিক রিওয়ার্ড দেওয়ার জন্য ২ সেকেন্ড ডিলে করছি (ডেমো হিসেবে)
+                setTimeout(async () => {
+                    try {
+                        await updateDoc(doc(db, "users", currentUser.uid), {
+                            balance: increment(amount),
+                            totalTasks: increment(1)
+                        });
+                        alert("Task processing... Reward will be added after verification!");
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }, 3000);
+            }
+        };
+    </script>
+</body>
+</html>

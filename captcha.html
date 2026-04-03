@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solve Captcha | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0a0d15; color: white; font-family: 'Inter', sans-serif; }
+        .captcha-box {
+            background: linear-gradient(135deg, #1e2632 0%, #111827 100%);
+            border: 2px dashed #374151;
+            letter-spacing: 12px;
+            text-shadow: 2px 2px 10px rgba(0, 230, 118, 0.3);
+            user-select: none;
+        }
+        .input-focus:focus { border-color: #00e676; box-shadow: 0 0 15px rgba(0, 230, 118, 0.2); }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .error-shake { animation: shake 0.2s ease-in-out 0s 2; border-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="p-6 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-md">
+        <div class="flex justify-between items-center mb-8">
+            <a href="dashboard.html" class="h-10 w-10 bg-[#1e2632] rounded-full flex items-center justify-center border border-gray-800 hover:text-[#00e676] transition">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Balance</p>
+                <p id="main-balance" class="text-[#00e676] font-black">$0.000</p>
+            </div>
+        </div>
+
+        <div class="bg-[#1e2632] p-8 rounded-[40px] border border-gray-800 shadow-2xl relative overflow-hidden">
+            <h1 class="text-2xl font-black text-center mb-2 uppercase italic">Solve <span class="text-[#00e676]">Captcha</span></h1>
+            <p class="text-center text-gray-500 text-xs mb-8 uppercase tracking-widest">Type the code exactly as shown</p>
+
+            <div class="relative mb-6">
+                <div id="captcha-code" class="captcha-box h-24 w-full rounded-3xl flex items-center justify-center text-3xl font-black italic text-[#00e676] select-none">
+                    Loading...
+                </div>
+                <button onclick="generateCaptcha()" class="absolute top-2 right-2 h-8 w-8 bg-black/40 rounded-full flex items-center justify-center hover:text-[#00e676] transition">
+                    <i class="fas fa-sync-alt text-xs"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <input type="text" id="captcha-input" placeholder="Enter Captcha Code" 
+                       class="w-full bg-black/40 border border-gray-800 rounded-2xl p-5 text-center text-xl font-bold uppercase outline-none transition-all input-focus">
+                
+                <button id="submitBtn" class="w-full bg-[#00e676] text-black font-black py-5 rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest">
+                    Submit & Earn $0.002
+                </button>
+            </div>
+
+            <p class="text-center text-[10px] text-gray-600 mt-8 font-bold uppercase tracking-[3px]">Unlimited Tasks Available</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentCaptcha = "";
+        const reward = 0.002;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // ব্যালেন্স লাইভ আপডেট
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    if (snap.exists()) {
+                        document.getElementById('main-balance').innerText = "$" + (snap.data().balance || 0).toFixed(3);
+                    }
+                });
+                window.generateCaptcha();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // ১. ক্যাপচা জেনারেট করা
+        window.generateCaptcha = () => {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let result = "";
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            currentCaptcha = result;
+            document.getElementById('captcha-code').innerText = result;
+            document.getElementById('captcha-input').value = "";
+            document.getElementById('captcha-input').classList.remove('error-shake');
+        };
+
+        // ২. সাবমিট লজিক
+        document.getElementById('submitBtn').onclick = async () => {
+            const userInput = document.getElementById('captcha-input').value.trim().toUpperCase();
+            const inputEl = document.getElementById('captcha-input');
+            const btn = document.getElementById('submitBtn');
+
+            if (userInput === currentCaptcha) {
+                btn.disabled = true;
+                btn.innerText = "VERIFYING...";
+
+                try {
+                    // ডাটাবেস আপডেট
+                    await updateDoc(doc(db, "users", currentUser.uid), {
+                        balance: increment(reward),
+                        totalTasks: increment(1)
+                    });
+                    
+                    // সাকসেস হলে নতুন ক্যাপচা
+                    window.generateCaptcha();
+                } catch (e) {
+                    alert("Sync Error! Check Connection.");
+                }
+                
+                btn.disabled = false;
+                btn.innerText = "Submit & Earn $0.002";
+            } else {
+                inputEl.classList.add('error-shake');
+                setTimeout(() => inputEl.classList.remove('error-shake'), 400);
+            }
+        };
+
+        // Enter key support
+        document.getElementById('captcha-input').onkeypress = (e) => {
+            if (e.key === 'Enter') document.getElementById('submitBtn').click();
+        };
+    </script>
+</body>
+</html>

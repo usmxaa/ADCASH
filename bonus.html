@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Bonus | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0a0d15; color: white; font-family: 'Inter', sans-serif; }
+        .disabled-btn { background: #1e2632 !important; color: #4b5563 !important; cursor: not-allowed; border: 1px solid #374151; }
+        .glow-effect { box-shadow: 0 0 30px rgba(0, 230, 118, 0.2); }
+    </style>
+</head>
+<body class="p-6 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-md w-full mx-auto text-center">
+        <a href="dashboard.html" class="absolute top-10 left-6 h-12 w-12 bg-[#1e2632] rounded-full flex items-center justify-center border border-gray-800 hover:text-[#00e676] transition">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <div class="bg-gradient-to-b from-[#00e676] to-[#00c853] p-16 rounded-[60px] mb-8 shadow-2xl relative overflow-hidden glow-effect">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+            <i class="fas fa-gift text-black text-8xl animate-bounce"></i>
+            <h1 class="text-black text-4xl font-black mt-6 italic tracking-tighter uppercase">Daily <span class="opacity-70">Gift</span></h1>
+        </div>
+        
+        <div class="bg-[#1e2632] p-10 rounded-[50px] border border-gray-800 shadow-xl relative">
+            <div id="status-icon" class="mb-4 text-[#00e676] text-2xl">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            
+            <p id="bonus-status" class="text-gray-400 font-bold text-sm mb-8 leading-relaxed uppercase tracking-widest">
+                Checking your daily gift availability...
+            </p>
+
+            <button id="claim-btn" class="w-full bg-[#00e676] text-black font-black py-6 rounded-[30px] uppercase tracking-widest text-lg hover:scale-[1.03] active:scale-95 transition-all shadow-lg">
+                Claim Reward
+            </button>
+
+            <p id="timer-text" class="hidden mt-6 text-xs font-black text-gray-500 uppercase tracking-[3px]">
+                Next claim in: <span id="countdown" class="text-[#00e676]">--:--:--</span>
+            </p>
+        </div>
+
+        <p class="mt-10 text-[10px] text-gray-600 font-black uppercase tracking-[4px]">Verified Daily Streak: <span id="streak-count" class="text-white">0</span> Days</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const BONUS_AMOUNT = 0.050; 
+        const COOLDOWN_TIME = 24 * 60 * 60 * 1000; 
+        let currentUser = null;
+        let timerInterval;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // লাইভ ডাটা লিসেনার
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        updateUI(data);
+                    }
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        function updateUI(data) {
+            const lastClaim = data.lastDailyClaim || 0;
+            const now = Date.now();
+            const timeLeft = lastClaim + COOLDOWN_TIME - now;
+
+            const btn = document.getElementById('claim-btn');
+            const status = document.getElementById('bonus-status');
+            const timerText = document.getElementById('timer-text');
+            const streakDisplay = document.getElementById('streak-count');
+
+            streakDisplay.innerText = data.dailyStreak || 0;
+
+            if (timeLeft > 0) {
+                btn.disabled = true;
+                btn.classList.add('disabled-btn');
+                btn.innerText = "Locked";
+                status.innerText = "You have already claimed today's gift!";
+                timerText.classList.remove('hidden');
+                startCountdown(timeLeft);
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('disabled-btn');
+                btn.innerText = "Claim Now";
+                status.innerText = "Your surprise reward is ready to be opened!";
+                timerText.classList.add('hidden');
+                clearInterval(timerInterval);
+            }
+        }
+
+        function startCountdown(duration) {
+            clearInterval(timerInterval);
+            const countdownEl = document.getElementById('countdown');
+            
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const distance = duration - (now - (Date.now() - duration)); // Adjusted logic
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                const hours = Math.floor((distance / (1000 * 60 * 60)));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownEl.innerText = `${hours}h ${minutes}m ${seconds}s`;
+            }, 1000);
+        }
+
+        document.getElementById('claim-btn').onclick = async () => {
+            const btn = document.getElementById('claim-btn');
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    balance: increment(BONUS_AMOUNT),
+                    lastDailyClaim: Date.now(),
+                    dailyStreak: increment(1)
+                });
+                alert(`Congratulations! You've received $${BONUS_AMOUNT.toFixed(3)}`);
+            } catch (error) {
+                alert("Error claiming bonus. Try again!");
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

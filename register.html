@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdCashGlobal - Log In & Start Earning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'], },
+                    colors: {
+                        'dark-bg': '#0a0d15',
+                        'card-bg': '#1e2632',
+                        'primary-green': '#00e676',
+                        'accent-blue': '#1877f2',
+                        'input-bg': '#131924',
+                        'border-gray': '#313d4f',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .card-shadow { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
+        .neon-btn { transition: 0.3s; position: relative; overflow: hidden; }
+        .neon-btn:hover { box-shadow: 0 0 25px rgba(0, 230, 118, 0.4); transform: translateY(-2px); }
+        .neon-btn:active { transform: translateY(0); }
+        .bg-glow {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 230, 118, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-white min-h-screen flex flex-col font-inter">
+    <div class="bg-glow"></div>
+
+    <header class="w-full flex justify-between items-center p-5 px-6 lg:px-12 border-b border-border-gray sticky top-0 bg-dark-bg/80 backdrop-blur-lg z-50">
+        <div class="flex items-center gap-2 cursor-pointer">
+            <div class="h-10 w-10 bg-primary-green rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(0,230,118,0.3)]">
+                <span class="text-black text-2xl font-black italic">A</span>
+            </div>
+            <span class="text-xl font-black tracking-tight italic uppercase">AdCash<span class="text-primary-green">Global</span></span>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-6">
+            <a href="#" class="text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition">Leaderboard</a>
+            <a href="login.html" class="bg-primary-green/10 text-primary-green px-6 py-2.5 rounded-xl font-black text-xs border border-primary-green/20 hover:bg-primary-green hover:text-black transition uppercase tracking-widest">Login</a>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center p-5 py-12 lg:py-20">
+        <div class="w-full max-w-7xl flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+            
+            <div class="flex-1 text-center lg:text-left space-y-12">
+                <div class="inline-flex items-center gap-2 bg-primary-green/10 border border-primary-green/20 px-4 py-2 rounded-full mb-4">
+                    <span class="flex h-2 w-2 rounded-full bg-primary-green animate-pulse"></span>
+                    <span class="text-primary-green text-[10px] font-black uppercase tracking-widest">$14,204.50 Paid out today</span>
+                </div>
+
+                <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] max-w-2xl mx-auto lg:mx-0 italic uppercase">
+                    Earn <span class="text-primary-green">Real Cash</span> <br> Every Day.
+                </h1>
+                
+                <p class="text-gray-500 font-bold text-lg max-w-lg mx-auto lg:mx-0">
+                    Join the fastest growing reward platform. Test apps, complete surveys, and get paid instantly.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto lg:mx-0">
+                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968260.png" alt="Binance" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
+                        <h3 class="font-black text-sm uppercase">Verify KYC</h3>
+                        <p class="text-primary-green font-black text-xl leading-none mt-1">$5.50</p>
+                    </div>
+                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
+                        <img src="https://cdn-icons-png.flaticon.com/512/888/888871.png" alt="TikTok" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
+                        <h3 class="font-black text-sm uppercase">TikTok Lite</h3>
+                        <p class="text-primary-green font-black text-xl leading-none mt-1">$1.20</p>
+                    </div>
+                    <div class="bg-card-bg p-5 rounded-[30px] border border-border-gray hover:border-primary-green/50 transition-all cursor-pointer group">
+                        <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Survey" class="h-10 mb-4 mx-auto lg:mx-0 group-hover:scale-110 transition">
+                        <h3 class="font-black text-sm uppercase">Quick Survey</h3>
+                        <p class="text-primary-green font-black text-xl leading-none mt-1">$0.85</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full max-w-md bg-card-bg p-8 md:p-10 rounded-[45px] border border-border-gray card-shadow relative">
+                <div class="absolute -top-6 -right-6 h-20 w-20 bg-primary-green text-black rounded-full flex flex-col items-center justify-center font-black leading-none rotate-12 border-8 border-dark-bg">
+                    <span class="text-xs">FREE</span>
+                    <span class="text-xl">$250</span>
+                    <span class="text-[8px]">BONUS</span>
+                </div>
+
+                <h2 class="text-3xl font-black text-center mb-8 italic uppercase tracking-tighter">Sign Up <span class="text-gray-500">Free</span></h2>
+                
+                <form id="signupForm" class="space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest">Full Name</label>
+                        <input type="text" id="name" required placeholder="Enter your name" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest">Email Address</label>
+                        <input type="email" id="email" required placeholder="name@example.com" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-gray-500 uppercase ml-2 tracking-widest">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full bg-primary-green text-black font-black py-5 rounded-2xl text-lg tracking-widest neon-btn uppercase italic shadow-[0_10px_20px_rgba(0,230,118,0.2)]">
+                        Start Earning Now
+                    </button>
+                </form>
+                
+                <p class="text-center text-gray-500 text-[10px] mt-8 font-black uppercase tracking-widest">
+                    Already have an account? <a href="login.html" class="text-white underline">Login</a>
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "CREATING ACCOUNT...";
+
+            try {
+                // ১. Firebase Auth এ ইউজার তৈরি
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // ২. Firestore এ ইউজারের ডাটা সেভ
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    balance: 0.00,
+                    totalTasks: 0,
+                    referEarnings: 0.00,
+                    dailyStreak: 0,
+                    lastDailyClaim: 0,
+                    joinedAt: new Date().toISOString(),
+                    role: "user" // অ্যাডমিন প্যানেলের জন্য জরুরি
+                });
+
+                alert("Welcome " + name + "! Account created successfully.");
+                window.location.href = "dashboard.html";
+
+            } catch (error) {
+                console.error(error);
+                alert("Error: " + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "START EARNING NOW";
+            }
+        });
+    </script>
+</body>
+</html>

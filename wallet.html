@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet | AdCashGlobal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #080a0f; color: white; font-family: 'Inter', sans-serif; }
+        .method-card { background: #161b22; border: 1px solid #1f2937; transition: 0.3s; position: relative; }
+        .method-card:hover { border-color: #00e676; transform: translateY(-3px); }
+        .method-card.active { border-color: #00e676; background: rgba(0, 230, 118, 0.05); }
+        .method-card.active::after {
+            content: '\f058'; font-family: 'Font Awesome 5 Free'; font-weight: 900;
+            position: absolute; top: 10px; right: 10px; color: #00e676; font-size: 14px;
+        }
+        .history-item { border-bottom: 1px solid #1f2937; }
+        .history-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="p-5 md:p-10">
+    <div class="max-w-2xl mx-auto">
+        
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-black uppercase tracking-tighter italic">My <span class="text-[#00e676]">Wallet</span></h1>
+            <a href="dashboard.html" class="h-10 w-10 bg-[#161b22] rounded-full flex items-center justify-center border border-gray-800 hover:text-[#00e676] transition">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+
+        <div class="bg-[#161b22] p-10 rounded-[40px] border-b-8 border-[#00e676] mb-10 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10">
+                <i class="fas fa-wallet text-8xl text-white"></i>
+            </div>
+            <p class="text-gray-500 uppercase text-xs tracking-[4px] font-black">Available Balance</p>
+            <h1 id="main-balance" class="text-6xl font-black text-[#00e676] mt-4">$0.000</h1>
+            <p class="text-gray-400 text-xs mt-2 font-bold uppercase tracking-widest italic underline decoration-[#00e676]">Verified Account Status</p>
+        </div>
+
+        <h3 class="text-xl font-bold mb-6 flex items-center gap-2 tracking-tight">
+            <i class="fas fa-university text-[#00e676] text-sm"></i> Select Withdraw Method
+        </h3>
+        
+        <div id="method-container" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10 text-center">
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'PayPal')">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174861.png" class="h-10 mb-3 transition group-hover:scale-110">
+                <span class="font-bold text-sm">PayPal</span>
+            </div>
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'Binance')">
+                <img src="https://cdn-icons-png.flaticon.com/512/14446/14446187.png" class="h-10 mb-3 transition group-hover:scale-110">
+                <span class="font-bold text-sm">Binance</span>
+            </div>
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'USDT')">
+                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="h-10 mb-3 transition group-hover:scale-110">
+                <span class="font-bold text-sm">USDT</span>
+            </div>
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'bKash')">
+                <img src="https://freelogopng.com/images/all_img/1656234745bkash-app-logo-png.png" class="h-10 mb-3 transition group-hover:scale-110">
+                <span class="font-bold text-sm">bKash</span>
+            </div>
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'Bitcoin')">
+                <img src="https://cdn-icons-png.flaticon.com/512/5968/5968260.png" class="h-10 mb-3 transition group-hover:scale-110">
+                <span class="font-bold text-sm">Bitcoin</span>
+            </div>
+            <div class="method-card p-6 rounded-[30px] flex flex-col items-center cursor-pointer group" onclick="selectMethod(this, 'GiftCard')">
+                <div class="h-10 w-10 bg-orange-500/20 rounded-full flex items-center justify-center mb-3">
+                    <i class="fas fa-gift text-orange-500 text-xl transition group-hover:scale-110"></i>
+                </div>
+                <span class="font-bold text-sm">GiftCard</span>
+            </div>
+        </div>
+
+        <div id="withdraw-form" class="hidden mb-10 bg-[#161b22] p-6 rounded-[30px] border border-[#00e676]/30">
+            <p class="text-[10px] font-black text-[#00e676] uppercase mb-4 tracking-widest">Withdraw via <span id="selected-name">None</span></p>
+            <input type="text" id="wallet-address" placeholder="Enter Account Email / Number" class="w-full bg-black/40 border border-gray-800 rounded-2xl p-4 text-sm focus:border-[#00e676] outline-none mb-4 text-white">
+            <input type="number" id="withdraw-amount" placeholder="Min $5.00" class="w-full bg-black/40 border border-gray-800 rounded-2xl p-4 text-sm focus:border-[#00e676] outline-none text-white">
+        </div>
+
+        <button id="withdrawBtn" class="w-full bg-[#00e676] text-black font-black py-5 rounded-[25px] text-xl shadow-[0_10px_30px_rgba(0,230,118,0.2)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-tighter disabled:bg-gray-700">
+            Withdraw Now
+        </button>
+
+        <div class="mt-16 mb-10">
+            <div class="flex justify-between items-end mb-6">
+                <h3 class="text-xl font-bold italic">Payment <span class="text-gray-500">History</span></h3>
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Real-Time Sync</span>
+            </div>
+            <div class="bg-[#161b22] rounded-[35px] border border-gray-800 overflow-hidden" id="history-container">
+                <p class="p-10 text-center text-gray-600 font-bold uppercase text-[10px] tracking-widest">Loading transactions...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, increment, collection, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
+            authDomain: "adcashglobal-efb58.firebaseapp.com",
+            projectId: "adcashglobal-efb58",
+            storageBucket: "adcashglobal-efb58.firebasestorage.app",
+            messagingSenderId: "749601861677",
+            appId: "1:749601861677:web:8a8d8da27be53d238f48a4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentBalance = 0;
+        let selectedMethodName = "";
+
+        // ১. ডাটা লোড ও ট্রানজেকশন হিস্ট্রি লিসেন করা
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // ইউজার ব্যালেন্স চেক
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    if (snap.exists()) {
+                        currentBalance = snap.data().balance || 0;
+                        document.getElementById('main-balance').innerText = "$" + currentBalance.toFixed(3);
+                    }
+                });
+
+                // হিস্ট্রি লোড (withdrawals কালেকশন থেকে)
+                const q = query(collection(db, "withdrawals"), where("uid", "==", user.uid), orderBy("timestamp", "desc"));
+                onSnapshot(q, (querySnapshot) => {
+                    const container = document.getElementById('history-container');
+                    if (querySnapshot.empty) {
+                        container.innerHTML = `<p class="p-10 text-center text-gray-600 font-bold uppercase text-[10px] tracking-widest">No recent transactions</p>`;
+                        return;
+                    }
+                    
+                    let historyHTML = "";
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "Just now";
+                        historyHTML += `
+                            <div class="history-item p-6 flex justify-between items-center bg-white/[0.02]">
+                                <div class="flex items-center gap-4">
+                                    <div class="h-12 w-12 bg-[#00e676]/10 rounded-2xl flex items-center justify-center text-[#00e676]">
+                                        <i class="fas fa-arrow-up text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">${data.method} Withdrawal</p>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase">${date}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-white">-$${data.amount.toFixed(2)}</p>
+                                    <p class="text-[9px] ${data.status === 'Pending' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-green-500/10 text-green-500'} px-2 py-0.5 rounded-full inline-block uppercase font-black">${data.status}</p>
+                                </div>
+                            </div>`;
+                    });
+                    container.innerHTML = historyHTML;
+                });
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // ২. মেথড সিলেক্ট করা (গ্লোবাল স্কোপের জন্য window তে রাখা)
+        window.selectMethod = (el, name) => {
+            document.querySelectorAll('.method-card').forEach(card => card.classList.remove('active'));
+            el.classList.add('active');
+            selectedMethodName = name;
+            document.getElementById('withdraw-form').classList.remove('hidden');
+            document.getElementById('selected-name').innerText = name;
+        };
+
+        // ৩. উইথড্র হ্যান্ডেল করা
+        document.getElementById('withdrawBtn').onclick = async () => {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const address = document.getElementById('wallet-address').value;
+
+            if (!selectedMethodName) return alert("Select a method!");
+            if (!address) return alert("Enter address/number!");
+            if (isNaN(amount) || amount < 5) return alert("Minimum withdrawal is $5!");
+            if (amount > currentBalance) return alert("Insufficient balance!");
+
+            const confirmAction = confirm(`Withdraw $${amount} to ${selectedMethodName}?`);
+            if (confirmAction) {
+                try {
+                    // ১. ইউজারের ব্যালেন্স কমানো
+                    const userRef = doc(db, "users", currentUser.uid);
+                    await updateDoc(userRef, {
+                        balance: increment(-amount)
+                    });
+
+                    // ২. উইথড্র রিকোয়েস্ট ডাটাবেসে সেভ করা
+                    await addDoc(collection(db, "withdrawals"), {
+                        uid: currentUser.uid,
+                        email: currentUser.email,
+                        method: selectedMethodName,
+                        amount: amount,
+                        address: address,
+                        status: "Pending",
+                        timestamp: new Date()
+                    });
+
+                    alert("Withdrawal request sent successfully!");
+                    document.getElementById('withdraw-amount').value = "";
+                    document.getElementById('wallet-address').value = "";
+                } catch (e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
