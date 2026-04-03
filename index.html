@@ -148,15 +148,11 @@
 
         let isLoginMode = true;
 
-        // ১. রিয়েল-টাইম কমান্ড রিসিভ করা (Maintenance Mode)
+        // ১. মেইনটেন্যান্স চেক (রিয়েল-টাইম কমান্ড)
         onSnapshot(doc(db, "system", "config"), (snap) => {
             if (snap.exists()) {
-                const config = snap.data();
-                if (config.maintenance === true) {
-                    maintenanceScreen.style.display = 'flex'; // সাইট বন্ধ হবে
-                } else {
-                    maintenanceScreen.style.display = 'none'; // সাইট চালু হবে
-                }
+                const isMaintenance = snap.data().maintenance;
+                maintenanceScreen.style.display = (isMaintenance === true) ? 'flex' : 'none';
             }
         });
 
@@ -175,7 +171,7 @@
             if (user) window.location.href = "dashboard.html";
         });
 
-        // ৪. ফর্ম সাবমিট (Login & Signup logic)
+        // ৪. ফর্ম সাবমিট
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -186,31 +182,29 @@
 
             try {
                 if (isLoginMode) {
-                    // LOGIN PROCESS
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
-                    // SIGNUP PROCESS
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
                     
-                    // অ্যাডমিন প্যানেল থেকে সেট করা বোনাস ডাটা রিড করা (system/config থেকে)
+                    // অ্যাডমিন প্যানেল থেকে বোনাস রিট্রিভ করা
                     const configSnap = await getDoc(doc(db, "system", "config"));
-                    const bonus = configSnap.exists() ? parseFloat(configSnap.data().dailyBonus) : 0.005;
+                    let bonus = 0.005; // Default bonus
+                    if (configSnap.exists()) {
+                        bonus = parseFloat(configSnap.data().dailyBonus) || 0.005;
+                    }
 
-                    // নতুন ইউজারের প্রোফাইল তৈরি
                     await setDoc(doc(db, "users", cred.user.uid), {
                         uid: cred.user.uid,
                         email: email,
                         name: email.split('@')[0],
-                        balance: bonus, // অ্যাডমিন যা সেট করেছে সেই বোনাস
+                        balance: bonus,
                         role: "user",
                         dateJoined: new Date().toLocaleDateString()
                     });
-                    
-                    alert(`Signup Success! You got $${bonus} bonus.`);
-                    window.location.href = "dashboard.html";
+                    alert(`Signup Success! You got $${bonus.toFixed(3)} bonus.`);
                 }
             } catch (err) {
-                alert("Error: " + err.message);
+                alert(err.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = isLoginMode ? "Login Now" : "Sign Up Now";
