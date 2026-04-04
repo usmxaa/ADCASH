@@ -51,9 +51,9 @@
 
     <main class="flex-1 flex items-center justify-center p-5 py-12">
         <div class="w-full max-w-md bg-card-bg p-8 md:p-10 rounded-[45px] border border-border-gray card-shadow relative">
-            <div class="absolute -top-6 -right-6 h-20 w-20 bg-primary-green text-black rounded-full flex flex-col items-center justify-center font-black leading-none rotate-12 border-8 border-dark-bg">
+            <div class="absolute -top-6 -right-6 h-20 w-20 bg-primary-green text-black rounded-full flex flex-col items-center justify-center font-black leading-none rotate-12 border-8 border-dark-bg shadow-xl">
                 <span class="text-[10px]">FREE</span>
-                <span id="bonusTag" class="text-lg">$0.05</span>
+                <span id="bonusTag" class="text-lg">$0.00</span>
                 <span class="text-[8px]">BONUS</span>
             </div>
 
@@ -75,13 +75,13 @@
                     <input type="password" id="password" required placeholder="••••••••" class="w-full bg-input-bg p-5 rounded-2xl border border-border-gray text-white font-bold focus:border-primary-green outline-none transition">
                 </div>
                 
-                <button type="submit" id="submitBtn" class="w-full bg-primary-green text-black font-black py-5 rounded-2xl text-lg tracking-widest neon-btn uppercase italic shadow-lg">
+                <button type="submit" id="submitBtn" class="w-full bg-primary-green text-black font-black py-5 rounded-2xl text-lg tracking-widest neon-btn uppercase italic shadow-lg mt-4">
                     Start Earning Now
                 </button>
             </form>
             
             <p class="text-center text-gray-500 text-[10px] mt-8 font-black uppercase tracking-widest">
-                Already have an account? <a href="index.html" class="text-white underline">Login</a>
+                Already have an account? <a href="index.html" class="text-white underline hover:text-primary-green">Login</a>
             </p>
         </div>
     </main>
@@ -89,7 +89,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
@@ -104,23 +104,22 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ১. অটো বোনাস ভ্যালু আপডেট (UI তে দেখানোর জন্য)
-        onSnapshot(doc(db, "settings", "site_config"), (snap) => {
+        // ১. রিয়েল-টাইম বোনাস এবং মেইনটেন্যান্স চেক (Global Settings থেকে)
+        const settingsRef = doc(db, "system", "config");
+        onSnapshot(settingsRef, (snap) => {
             if (snap.exists()) {
-                const bonus = snap.data().signupBonus || 0.05;
-                document.getElementById('bonusTag').innerText = `$${bonus}`;
+                const data = snap.data();
+                const bonus = data.dailyBonus || 0.05; // আপনার সেটিংস অনুযায়ী
+                document.getElementById('bonusTag').innerText = `$${bonus.toFixed(2)}`;
                 
-                // যদি সাইট মেইনটেন্যান্সে থাকে, ইনডেক্সে পাঠিয়ে দাও
-                if(snap.data().maintenanceMode) window.location.href = "index.html";
+                if(data.maintenance) {
+                    alert("Site is under maintenance. Please try again later.");
+                    window.location.href = "index.html";
+                }
             }
         });
 
-        // ২. অটো লগইন চেক
-        onAuthStateChanged(auth, (user) => {
-            if (user) window.location.href = "dashboard.html";
-        });
-
-        // ৩. রেজিস্ট্রেশন প্রসেস
+        // ২. সাইন-আপ প্রসেস
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -132,39 +131,36 @@
             submitBtn.innerText = "CREATING ACCOUNT...";
 
             try {
-                // সাইনআপ বোনাস রিট্রিভ
-                const configSnap = await getDoc(doc(db, "settings", "site_config"));
+                // বোনাস ভ্যালু রিট্রিভ করা
+                const configSnap = await getDoc(settingsRef);
                 let signupBonus = 0.05;
                 if (configSnap.exists()) {
-                    signupBonus = parseFloat(configSnap.data().signupBonus) || 0.05;
+                    signupBonus = parseFloat(configSnap.data().dailyBonus) || 0.05;
                 }
 
-                // Firebase Auth ইউজার তৈরি
+                // ১. Firebase Auth ইউজার তৈরি
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Firestore-এ ইউজার প্রোফাইল ডাটা সেট
+                // ২. Firestore "users" কালেকশনে ডাটা সেভ (এটিই অ্যাডমিন প্যানেলে দেখাবে)
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     name: name,
                     email: email,
-                    balance: signupBonus,
+                    balance: signupBonus, // বোনাস যোগ হবে
                     todayEarnings: 0.0000,
                     totalTasks: 0,
-                    referEarnings: 0.00,
                     role: "user",
                     dateJoined: new Date().toLocaleDateString(),
-                    joinedAt: new Date().toISOString()
+                    createdAt: serverTimestamp()
                 });
 
-                alert(`Welcome ${name}! You received $${signupBonus.toFixed(2)} Signup Bonus.`);
+                alert("Success! Account created with $" + signupBonus + " Bonus.");
                 window.location.href = "dashboard.html";
 
             } catch (error) {
                 let msg = error.message;
-                if(error.code === 'auth/email-already-in-use') msg = "Email already registered!";
-                if(error.code === 'auth/weak-password') msg = "Password should be at least 6 characters.";
-                
+                if(error.code === 'auth/email-already-in-use') msg = "Email already in use!";
                 alert("Error: " + msg);
                 submitBtn.disabled = false;
                 submitBtn.innerText = "START EARNING NOW";
