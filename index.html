@@ -105,22 +105,6 @@
         </div>
     </main>
 
-    <footer class="w-full p-8 border-t border-border-gray bg-card-bg/30">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="flex items-center gap-8">
-                <div class="text-center md:text-left">
-                    <p class="text-primary-green font-black text-2xl leading-none">4.8/5</p>
-                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Trustpilot</p>
-                </div>
-                <div class="text-center md:text-left">
-                    <p class="text-white font-black text-2xl leading-none">1.2M+</p>
-                    <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Active Users</p>
-                </div>
-            </div>
-            <p class="text-gray-600 text-[10px] font-black uppercase tracking-widest">© 2026 AdCashGlobal</p>
-        </div>
-    </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -148,15 +132,15 @@
 
         let isLoginMode = true;
 
-        // ১. মেইনটেন্যান্স চেক (রিয়েল-টাইম কমান্ড)
-        onSnapshot(doc(db, "system", "config"), (snap) => {
+        // ১. মেইনটেন্যান্স চেক (Firestore: settings/site_config)
+        onSnapshot(doc(db, "settings", "site_config"), (snap) => {
             if (snap.exists()) {
-                const isMaintenance = snap.data().maintenance;
-                maintenanceScreen.style.display = (isMaintenance === true) ? 'flex' : 'none';
+                const config = snap.data();
+                maintenanceScreen.style.display = (config.maintenanceMode === true) ? 'flex' : 'none';
             }
         });
 
-        // ২. লগইন/সাইনআপ সুইচ
+        // ২. লগইন/সাইনআপ মোড সুইচ
         toggleAuth.addEventListener('click', (e) => {
             e.preventDefault();
             isLoginMode = !isLoginMode;
@@ -171,7 +155,7 @@
             if (user) window.location.href = "dashboard.html";
         });
 
-        // ৪. ফর্ম সাবমিট
+        // ৪. ফর্ম সাবমিট প্রসেস
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -182,29 +166,39 @@
 
             try {
                 if (isLoginMode) {
+                    // লগইন লজিক
                     await signInWithEmailAndPassword(auth, email, password);
                 } else {
+                    // সাইনআপ লজিক
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
                     
-                    // অ্যাডমিন প্যানেল থেকে বোনাস রিট্রিভ করা
-                    const configSnap = await getDoc(doc(db, "system", "config"));
-                    let bonus = 0.005; // Default bonus
+                    // বোনাস ভ্যালু রিট্রিভ (Firestore: settings/site_config)
+                    const configSnap = await getDoc(doc(db, "settings", "site_config"));
+                    let bonus = 0.05; // Default bonus
                     if (configSnap.exists()) {
-                        bonus = parseFloat(configSnap.data().dailyBonus) || 0.005;
+                        bonus = parseFloat(configSnap.data().signupBonus) || 0.05;
                     }
 
+                    // ইউজার ডাটাবেস তৈরি
                     await setDoc(doc(db, "users", cred.user.uid), {
                         uid: cred.user.uid,
                         email: email,
                         name: email.split('@')[0],
                         balance: bonus,
+                        todayEarnings: 0.0000,
                         role: "user",
                         dateJoined: new Date().toLocaleDateString()
                     });
-                    alert(`Signup Success! You got $${bonus.toFixed(3)} bonus.`);
+                    alert(`Signup Success! You received $${bonus.toFixed(3)} bonus.`);
                 }
+                window.location.href = "dashboard.html";
             } catch (err) {
-                alert(err.message);
+                // এরর হ্যান্ডলিং
+                let errorMsg = "Something went wrong!";
+                if (err.code === 'auth/wrong-password') errorMsg = "Wrong password!";
+                if (err.code === 'auth/user-not-found') errorMsg = "No user found with this email!";
+                if (err.code === 'auth/email-already-in-use') errorMsg = "Email already registered!";
+                alert(errorMsg + " (" + err.message + ")");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = isLoginMode ? "Login Now" : "Sign Up Now";
