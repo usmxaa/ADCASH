@@ -7,18 +7,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0d1117; font-family: 'Inter', sans-serif; color: white; }
+        body { background-color: #0d1117; font-family: 'Inter', sans-serif; color: white; overflow-x: hidden; }
         .sidebar-item:hover { background-color: #161b22; color: #00e676; border-right: 4px solid #00e676; }
         .sidebar-item.active { background-color: #161b22; color: #00e676; border-right: 4px solid #00e676; }
         .card-bg { background: linear-gradient(145deg, #161b22, #1c2128); border: 1px solid #30363d; }
         .neon-text { color: #00e676; text-shadow: 0 0 10px rgba(0, 230, 118, 0.3); }
-        .neon-btn { background-color: #00e676; color: #000; transition: 0.3s; }
+        .neon-btn { background-color: #00e676; color: #000; transition: 0.3s; cursor: pointer; }
         .neon-btn:hover { box-shadow: 0 0 20px rgba(0, 230, 118, 0.4); transform: translateY(-2px); }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        #maintenance-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0d1117; z-index: 9999; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
+
+    <div id="maintenance-overlay">
+        <i class="fas fa-tools text-5xl text-[#00e676] animate-bounce mb-4"></i>
+        <h2 class="text-2xl font-bold italic uppercase">Maintenance Mode</h2>
+        <p class="text-gray-500 text-sm mt-2">We are back shortly!</p>
+    </div>
 
     <nav class="w-full md:w-64 card-bg flex flex-col p-6 space-y-6 md:sticky md:top-0 md:h-screen z-50">
         <div class="text-2xl font-black flex items-center gap-2 mb-8 italic uppercase tracking-tighter">
@@ -54,7 +65,7 @@
                 </div>
                 <div class="overflow-hidden">
                     <p id="userNameDisplay" class="text-sm font-black group-hover:text-[#00e676] transition-colors truncate">Loading...</p>
-                    <p id="userCountryDisplay" class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Active Member</p>
+                    <p id="userStatusDisplay" class="text-[9px] text-[#00e676] font-black uppercase tracking-widest">Active Member</p>
                 </div>
             </div>
         </div>
@@ -139,7 +150,6 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDgYMAl2aHN4jRewz5byM98psQK6AK7wlo",
             authDomain: "adcashglobal-efb58.firebaseapp.com",
@@ -153,36 +163,43 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // রিয়েল-টাইম ডাটা আপডেট লজিক
+        // গ্লোবাল লগআউট ফাংশন
+        window.logoutUser = () => {
+            if(confirm("Do you want to logout?")) {
+                signOut(auth).then(() => {
+                    window.location.href = "index.html";
+                });
+            }
+        };
+
+        // মেইনটেন্যান্স চেক
+        onSnapshot(doc(db, "settings", "site_config"), (snap) => {
+            if (snap.exists() && snap.data().maintenanceMode) {
+                document.getElementById('maintenance-overlay').style.display = 'flex';
+            } else {
+                document.getElementById('maintenance-overlay').style.display = 'none';
+            }
+        });
+
+        // অথেনটিকেশন এবং ডাটা আপডেট
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // ডাটাবেস থেকে ইউজারের তথ্য আনা
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
                         
-                        // UI আপডেট করা
                         document.getElementById('userNameDisplay').innerText = data.name || data.email.split('@')[0];
                         document.getElementById('balanceDisplay').innerText = `$${(data.balance || 0).toFixed(4)}`;
                         document.getElementById('todayEarnDisplay').innerText = `$${(data.todayEarnings || 0).toFixed(4)}`;
                         
-                        // অ্যাভাটার আপডেট
                         const name = data.name || "User";
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${name}&background=00e676&color=000`;
+                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00e676&color=000&bold=true`;
                     }
                 });
             } else {
-                // লগইন না থাকলে ইনডেক্স পেজে পাঠিয়ে দাও
                 window.location.href = "index.html";
             }
         });
-
-        // লগআউট ফাংশন
-        window.logoutUser = () => {
-            signOut(auth).then(() => {
-                window.location.href = "index.html";
-            });
-        };
     </script>
 </body>
 </html>
