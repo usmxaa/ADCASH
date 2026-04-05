@@ -161,28 +161,29 @@
                 // Debug: Check user data in Console
                 const userRef = doc(db, "users", user.uid);
                 
-                onSnapshot(userRef, (snap) => {
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        console.log("Database Data Received:", data); // F12 চেপে এখানে ডাটা চেক করুন
+               onSnapshot(doc(db, "users", user.uid), (snap) => {
+    if (snap.exists()) {
+        const data = snap.data();
+        console.log("Data from DB:", data); // চেক করার জন্য
 
-                        // একাধিক সম্ভাব্য ফিল্ড চেক করা হচ্ছে
-                        const bal = data.balance ?? data.Balance ?? data.wallet ?? 0;
-                        const earn = data.todayEarnings ?? data.TodayEarnings ?? 0;
-                        const name = data.name ?? data.Name ?? user.email.split('@')[0];
+        // আপনার ডাটাবেসে 'balance' আছে, তাই এটি নিশ্চিত করুন:
+        const currentBalance = data.balance || 0;
+        
+        // যদি আজকের প্রফিট বা নাম অন্য ফিল্ডে থাকে
+        const todayProfit = data.todayEarnings || data.today_profit || 0;
+        const name = data.name || data.email.split('@')[0];
 
-                        // UI Update
-                        document.getElementById('balanceDisplay').innerText = `$${parseFloat(bal).toFixed(4)}`;
-                        document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(earn).toFixed(4)}`;
-                        document.getElementById('userNameDisplay').innerText = name;
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00e676&color=000&bold=true`;
-                    } else {
-                        console.error("No Firestore document found for UID:", user.uid);
-                        document.getElementById('userNameDisplay').innerText = "Data Missing";
-                    }
-                }, (error) => {
-                    console.error("Firestore Error:", error.message);
-                });
+        // UI আপডেট
+        document.getElementById('balanceDisplay').innerText = `$${parseFloat(currentBalance).toFixed(4)}`;
+        document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(todayProfit).toFixed(4)}`;
+        document.getElementById('userNameDisplay').innerText = name;
+    } else {
+        console.log("No user document found!");
+        document.getElementById('userNameDisplay').innerText = "User Not Found";
+    }
+}, (error) => {
+    console.error("Firestore Error:", error.message);
+});
             } else {
                 window.location.href = "index.html";
             }
