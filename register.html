@@ -104,17 +104,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const settingsRef = doc(db, "system", "config");
+        // ১. বোনাস ডাটা পাথ আপডেট (আপনার ডাটাবেস অনুযায়ী settings/users)
+        const settingsRef = doc(db, "settings", "users");
 
-        // ১. বোনাস ডিসপ্লে আপডেট (Live)
         onSnapshot(settingsRef, (snap) => {
             if (snap.exists()) {
-                const bonus = snap.data().signupBonus || 0.05;
+                const data = snap.data();
+                const bonus = data.signupBonus || 0.05;
                 document.getElementById('bonusTag').innerText = `$${parseFloat(bonus).toFixed(2)}`;
             }
         });
 
-        // ২. সাইন-আপ ফাংশন
+        // ২. সাইন-আপ প্রসেস
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -133,30 +134,30 @@
                     signupBonus = parseFloat(configSnap.data().signupBonus) || 0.05;
                 }
 
-                // Authentication এ ইউজার তৈরি
+                // ইউজার তৈরি
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Firestore এ ডাটা পাঠানো (অবশ্যই "users" কালেকশনে)
+                // Firestore এ প্রোফাইল ডাটা সেভ
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     name: name,
                     email: email,
-                    balance: signupBonus,      // এখানে বোনাস ভ্যালু জমা হচ্ছে
+                    balance: signupBonus,
                     todayEarnings: 0.00,
-                    totalTasks: 0,
-                    role: "user",
                     status: "active",
+                    role: "user",
                     createdAt: serverTimestamp()
                 });
 
-                alert("Account created successfully!");
+                console.log("Success: Data saved for UID", user.uid);
+                alert("Welcome! Registration Success.");
                 window.location.href = "dashboard.html";
 
             } catch (error) {
-                console.error("Firestore Save Error:", error);
+                console.error("Registration Error:", error);
                 let msg = error.message;
-                if(error.code === 'auth/email-already-in-use') msg = "Email already in use!";
+                if(error.code === 'auth/email-already-in-use') msg = "This email is already registered!";
                 alert("Error: " + msg);
                 submitBtn.disabled = false;
                 submitBtn.innerText = "START EARNING NOW";
