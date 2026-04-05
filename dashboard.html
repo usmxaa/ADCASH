@@ -154,40 +154,39 @@
             }
         });
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("Logged in UID:", user.uid);
-                
-                // Debug: Check user data in Console
-                const userRef = doc(db, "users", user.uid);
-                
-               onSnapshot(doc(db, "users", user.uid), (snap) => {
-    if (snap.exists()) {
-        const data = snap.data();
-        console.log("Data from DB:", data); // চেক করার জন্য
-
-        // আপনার ডাটাবেসে 'balance' আছে, তাই এটি নিশ্চিত করুন:
-        const currentBalance = data.balance || 0;
+      onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("আপনার লগইন করা UID:", user.uid); // F12 চেপে এখানে দেখুন আইডি মিলছে কি না
         
-        // যদি আজকের প্রফিট বা নাম অন্য ফিল্ডে থাকে
-        const todayProfit = data.todayEarnings || data.today_profit || 0;
-        const name = data.name || data.email.split('@')[0];
+        const userRef = doc(db, "users", user.uid);
+        
+        onSnapshot(userRef, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                console.log("ডাটাবেস থেকে প্রাপ্ত ডাটা:", data);
 
-        // UI আপডেট
-        document.getElementById('balanceDisplay').innerText = `$${parseFloat(currentBalance).toFixed(4)}`;
-        document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(todayProfit).toFixed(4)}`;
-        document.getElementById('userNameDisplay').innerText = name;
-    } else {
-        console.log("No user document found!");
-        document.getElementById('userNameDisplay').innerText = "User Not Found";
-    }
-}, (error) => {
-    console.error("Firestore Error:", error.message);
-});
+                // ব্যালেন্স এবং প্রফিট আপডেট
+                const bal = data.balance || 0;
+                const profit = data.todayEarnings || 0;
+                const name = data.name || data.email.split('@')[0];
+
+                document.getElementById('balanceDisplay').innerText = `$${parseFloat(bal).toFixed(4)}`;
+                document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(profit).toFixed(4)}`;
+                document.getElementById('userNameDisplay').innerText = name;
             } else {
-                window.location.href = "index.html";
+                // যদি আইডি না মেলে তবে এটি দেখাবে
+                console.error("এই UID-এর কোনো ডাটা 'users' কালেকশনে নেই!");
+                document.getElementById('userNameDisplay').innerText = "Data Missing";
+                document.getElementById('balanceDisplay').innerText = "$0.0000";
             }
+        }, (error) => {
+            console.error("Firestore Error:", error.message);
+            alert("Database Error: " + error.message);
         });
+    } else {
+        window.location.href = "index.html";
+    }
+});
     </script>
 </body>
 </html>
