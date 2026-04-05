@@ -88,7 +88,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -104,22 +104,17 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ১. রিয়েল-টাইম বোনাস এবং মেইনটেন্যান্স চেক (Global Settings থেকে)
         const settingsRef = doc(db, "system", "config");
+
+        // ১. বোনাস ডিসপ্লে আপডেট (Live)
         onSnapshot(settingsRef, (snap) => {
             if (snap.exists()) {
-                const data = snap.data();
-                const bonus = data.dailyBonus || 0.05; // আপনার সেটিংস অনুযায়ী
-                document.getElementById('bonusTag').innerText = `$${bonus.toFixed(2)}`;
-                
-                if(data.maintenance) {
-                    alert("Site is under maintenance. Please try again later.");
-                    window.location.href = "index.html";
-                }
+                const bonus = snap.data().signupBonus || 0.05;
+                document.getElementById('bonusTag').innerText = `$${parseFloat(bonus).toFixed(2)}`;
             }
         });
 
-        // ২. সাইন-আপ প্রসেস
+        // ২. সাইন-আপ ফাংশন
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -135,30 +130,31 @@
                 const configSnap = await getDoc(settingsRef);
                 let signupBonus = 0.05;
                 if (configSnap.exists()) {
-                    signupBonus = parseFloat(configSnap.data().dailyBonus) || 0.05;
+                    signupBonus = parseFloat(configSnap.data().signupBonus) || 0.05;
                 }
 
-                // ১. Firebase Auth ইউজার তৈরি
+                // Authentication এ ইউজার তৈরি
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // ২. Firestore "users" কালেকশনে ডাটা সেভ (এটিই অ্যাডমিন প্যানেলে দেখাবে)
+                // Firestore এ ডাটা পাঠানো (অবশ্যই "users" কালেকশনে)
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     name: name,
                     email: email,
-                    balance: signupBonus, // বোনাস যোগ হবে
-                    todayEarnings: 0.0000,
+                    balance: signupBonus,      // এখানে বোনাস ভ্যালু জমা হচ্ছে
+                    todayEarnings: 0.00,
                     totalTasks: 0,
                     role: "user",
-                    dateJoined: new Date().toLocaleDateString(),
+                    status: "active",
                     createdAt: serverTimestamp()
                 });
 
-                alert("Success! Account created with $" + signupBonus + " Bonus.");
+                alert("Account created successfully!");
                 window.location.href = "dashboard.html";
 
             } catch (error) {
+                console.error("Firestore Save Error:", error);
                 let msg = error.message;
                 if(error.code === 'auth/email-already-in-use') msg = "Email already in use!";
                 alert("Error: " + msg);
