@@ -72,7 +72,6 @@
     </nav>
 
     <main class="flex-1 p-6 md:p-10 space-y-10 overflow-y-auto">
-        
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="card-bg p-8 rounded-[30px] flex justify-between items-center relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
@@ -163,15 +162,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Global Logout Function
         window.logoutUser = () => {
-            if(confirm("Do you want to logout?")) {
-                signOut(auth).then(() => {
-                    window.location.href = "index.html";
-                });
+            if(confirm("Confirm Logout?")) {
+                signOut(auth).then(() => { window.location.href = "index.html"; });
             }
         };
 
-        // মেইনটেন্যান্স চেক (Admin Settings Path: system/config)
+        // 1. Maintenance Logic (Admin Path: system/config)
         onSnapshot(doc(db, "system", "config"), (snap) => {
             if (snap.exists() && snap.data().maintenance) {
                 document.getElementById('maintenance-overlay').style.display = 'flex';
@@ -180,24 +178,36 @@
             }
         });
 
+        // 2. Core User Data Logic
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                const userRef = doc(db, "users", user.uid);
+                
+                onSnapshot(userRef, (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
                         
-                        // ব্যালেন্স আপডেট লজিক (বড়/ছোট হাতের অক্ষর চেক করা হয়েছে)
-                        const userBalance = data.Balance || data.balance || 0;
-                        const todayEarn = data.TodayEarnings || data.todayEarnings || 0;
-                        const name = data.name || data.email.split('@')[0];
+                        // ব্যালেন্স চেক: অ্যাডমিন থেকে ডাটা ছোট হাতের বা বড় হাতের যেভাবেই আসুক, তা ক্যাশ করবে
+                        const bal = data.balance ?? data.Balance ?? data.wallet ?? 0;
+                        const profit = data.todayEarnings ?? data.TodayEarnings ?? 0;
+                        const name = data.name ?? data.Name ?? user.email.split('@')[0];
 
+                        // UI Update with error safety
+                        document.getElementById('balanceDisplay').innerText = `$${parseFloat(bal).toFixed(4)}`;
+                        document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(profit).toFixed(4)}`;
                         document.getElementById('userNameDisplay').innerText = name;
-                        document.getElementById('balanceDisplay').innerText = `$${parseFloat(userBalance).toFixed(4)}`;
-                        document.getElementById('todayEarnDisplay').innerText = `$${parseFloat(todayEarn).toFixed(4)}`;
                         
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00e676&color=000&bold=true`;
+                        // Update Avatar
+                        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00e676&color=000&bold=true`;
+                        document.getElementById('userAvatar').src = avatarUrl;
+                        
+                    } else {
+                        document.getElementById('userNameDisplay').innerText = "Account Setup Required";
                     }
+                }, (error) => {
+                    console.error("Firestore error:", error);
                 });
+
             } else {
                 window.location.href = "index.html";
             }
